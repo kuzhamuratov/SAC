@@ -1,2 +1,4 @@
 __pycache__/
 runs/
+models/
+.ipynb_checkpoints
