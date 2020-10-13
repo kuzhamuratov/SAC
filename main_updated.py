@@ -8,7 +8,7 @@ from sac import SAC
 from torch.utils.tensorboard import SummaryWriter
 from replay_memory import ReplayMemory
 import robel
-from updated_env import DKittyOrientRandomDynamics
+from updated_env import DKittyWalkRandom, DKittyOrientRandomDynamics
 
 parser = argparse.ArgumentParser(description='PyTorch Soft Actor-Critic Args')
 parser.add_argument('--env-name', default="HalfCheetah-v2",
@@ -51,10 +51,10 @@ args = parser.parse_args()
 # Environment
 # env = NormalizedActions(gym.make(args.env_name))
 #env = gym.make(args.env_name)
-env = DKittyOrientRandomDynamics([2.]*8)
+env = DKittyWalkRandom()# DKittyOrientRandomDynamics([2.]*8)
 env.seed(args.seed)
 env.action_space.seed(args.seed)
-env._max_episode_steps = 80 ####### TO CHECK ITs consistent with PEARL (Arsen)
+env._max_episode_steps = 160 ####### TO CHECK ITs consistent with PEARL (Arsen)
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
 
@@ -80,7 +80,7 @@ for i_episode in itertools.count(1):
     episode_steps = 0
     done = False
     state = env.reset()
-#    env.render()
+ #   env.render()
     j = 0
     while not done and j<env._max_episode_steps:
         j += 1
