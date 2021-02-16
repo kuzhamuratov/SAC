@@ -1,4 +1,5 @@
 import numpy as np
+import collections
 from robel.dkitty.orient import DKittyOrientRandom
 from robel.dkitty.walk import BaseDKittyWalk
 from robel.simulation.randomize import SimRandomizer
@@ -36,6 +37,24 @@ class DKittyWalkRandom(BaseDKittyWalk):
             np.cos(target_theta), np.sin(target_theta), 0
         ])
         super()._reset()
+
+    def get_reward_dict(self, action: np.ndarray, obs_dict: Dict[str, np.ndarray],) -> Dict[str, np.ndarray]:
+        """Returns the reward for the given action and observation."""
+        target_xy_dist = np.linalg.norm(obs_dict['target_error'])
+        heading = obs_dict['heading']
+
+        reward_dict = collections.OrderedDict((
+            # Add reward terms for being upright.
+            *self._get_upright_rewards(obs_dict).items(),
+            # Reward for proximity to the target.
+            ('target_dist_cost', -4 * target_xy_dist),
+            # Heading - 1 @ cos(0) to 0 @ cos(25deg).
+            ('heading', 2 * (-heading - 0.9) / 0.1),
+            # Bonus
+            ('bonus_small', 5 * ((target_xy_dist < 0.5) + (heading > 0.9))),
+            ('bonus_big', 10 * (target_xy_dist < 0.5) * (heading > 0.9)),
+        ))
+        return reward_dict
 
 class DKittyOrientRandomDynamics(DKittyOrientRandom):
     """Walk straight towards a random location."""
